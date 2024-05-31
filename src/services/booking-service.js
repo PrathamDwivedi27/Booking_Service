@@ -13,18 +13,29 @@ class BookingService{
         try {
             const flightId=data.flightId;
             
-            const getFlightRequestURL=`${FLIGHT_SERVICE_PATH}/api/v1/flights/${flightId}`
+
+           const getFlightRequestURL=`${FLIGHT_SERVICE_PATH}/api/v1/flights/${flightId}`
         
-            const flight=await axios.get(getFlightRequestURL);
+            const response=await axios.get(getFlightRequestURL);
         
             const flightData=response.data.data;
             let priceOfTheFlight=flightData.price;
             if(data.noOfSeats>flightData.totalSeats){
                 throw new ServiceError('Something went wrong in Booking process','Insufficient seats in flight');
             }
-            
+            const totalCost= priceOfTheFlight*data.noOfSeats;
+            const bookingPayload={...data,totalCost};
+            const booking =await this.bookingRepository.create(bookingPayload);
+            const updateFlightRequestURL=`${FLIGHT_SERVICE_PATH}/api/v1/flights/${flightId}`;
+            await axios.patch(updateFlightRequestURL,{totalSeats:flightData.totalSeats-booking.noOfSeats});
+            const finalBooking=await this.bookingRepository.update(booking.id,{status:'Booked'})
+            return finalBooking;
+             
         } catch (error) {
             console.log(error);
+            if(error.name=='RepositoryError' || error.name=='SequelizeValidationError'){
+                throw error;
+            }
             throw new ServiceError(); 
         }
     }

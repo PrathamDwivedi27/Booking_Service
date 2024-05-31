@@ -7,6 +7,7 @@ const create=async (req,res)=>{
     try {
         console.log(req.body)
         const response=await bookingService.createBooking(req.body);
+        console.log(response)
         return res.status(StatusCodes.OK).json({
             data:response,
             message:'Successfully completed booking',
