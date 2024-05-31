@@ -1,6 +1,6 @@
 const {StatusCodes}=require('http-status-codes');
 
-class ValidaationError extends Error{
+class ValidationError extends Error{
     constructor(error){
         super();
         let explanation=[];
@@ -14,4 +14,4 @@ class ValidaationError extends Error{
     }
 }
 
-module.exports=ValidaationError;
+module.exports=ValidationError;
